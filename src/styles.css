@@ -1,0 +1,940 @@
+/*
+ * Each colour for the light and the dark scheme: light-dark() picks by the color-scheme in force,
+ * the system's unless a theme is chosen (src/app/theme.ts).
+ */
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#f6f6f4, #0e0f11);
+  --surface: light-dark(#ffffff, #17181b);
+  --text: light-dark(#16171a, #eceef1);
+  --muted: light-dark(#6b6e76, #8d9199);
+  --line: light-dark(#e2e2de, #2a2c31);
+  --accent: light-dark(#2357d6, #84a9ff);
+  --warning: light-dark(#9a4b06, #f5b56b);
+  --warning-bg: light-dark(#fdf1e2, #2c2117);
+  font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.45;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/*
+ * The reader's own three colours, and the rest mixed from them. Its color-scheme, for what is
+ * left to light-dark(), is set beside them by whether the background is dark.
+ */
+:root[data-theme="custom"] {
+  --bg: var(--custom-background);
+  --text: var(--custom-text);
+  --accent: var(--custom-accent);
+  --surface: color-mix(in srgb, var(--custom-background) 90%, var(--custom-text));
+  --muted: color-mix(in srgb, var(--custom-text) 62%, var(--custom-background));
+  --line: color-mix(in srgb, var(--custom-text) 18%, var(--custom-background));
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+
+/* The name, the search and the tools, with the search in the true centre whatever is beside it. */
+.top {
+  display: grid;
+  grid-template-areas: "brand search tools";
+  grid-template-columns: 1fr minmax(16rem, 34rem) 1fr;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem clamp(1rem, 3vw, 2rem);
+}
+
+/* The name and the byline, the same size, so centred alike; the byline dim and light. */
+.brand {
+  display: flex;
+  grid-area: brand;
+  align-items: center;
+  justify-self: start;
+  gap: 0.3em;
+  font-size: 1.2rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}
+
+.brand-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text);
+}
+
+.brand-home:hover {
+  text-decoration: none;
+}
+
+.brand-by {
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.brand-by a {
+  color: inherit;
+}
+
+.brand-by a:hover {
+  color: var(--text);
+}
+
+/* The favicon's clock face, its hands at the reader's own time. */
+.brand-mark {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.brand-face {
+  fill: var(--text);
+}
+
+.brand-hand {
+  stroke: var(--bg);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.brand-pin {
+  fill: var(--accent);
+}
+
+.search {
+  position: relative;
+  display: flex;
+  grid-area: search;
+  align-items: center;
+  container: search / inline-size;
+}
+
+.search > .icon {
+  position: absolute;
+  left: 0.8rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.search input {
+  width: 100%;
+  padding: 0.55rem 1rem 0.55rem 2.6rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+}
+
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* The way back to the reader's own clock, at the end of the box: a way to go, as links are. */
+.your-time {
+  position: absolute;
+  right: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.55rem;
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.875rem;
+}
+
+.your-time:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  text-decoration: none;
+}
+
+.your-time .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.search input.with-your-time {
+  padding-right: 7.25rem;
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: min(28rem, 70vh);
+  margin: 0;
+  padding: 0.25rem;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+}
+
+.search-empty {
+  padding: 0.75rem 1rem;
+  color: var(--muted);
+}
+
+.search-result {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.4rem 0.45rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.search-result[aria-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.result-names {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.result-title {
+  font-weight: 600;
+}
+
+.result-subtitle {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-time {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tools {
+  display: flex;
+  grid-area: tools;
+  justify-self: end;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.toggle,
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.toggle[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--text) 35%, transparent);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.icon-button {
+  padding: 0.4rem;
+  border-color: transparent;
+}
+
+.toggle:hover,
+.icon-button:hover {
+  color: var(--text);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Where the name and the tools share a phone's width, the byline gives way. */
+@media (max-width: 28rem) {
+  .brand-by {
+    display: none;
+  }
+}
+
+/* Short of room for the search between the name and the tools, it takes a row of its own. */
+@media (max-width: 56rem) {
+  .top {
+    grid-template-areas:
+      "brand tools"
+      "search search";
+    grid-template-columns: auto 1fr;
+  }
+}
+
+/* In a narrow box, by whatever squeezes it, the icon alone, to leave room for what is typed. */
+@container search (max-width: 30rem) {
+  .your-time {
+    padding: 0.35rem;
+  }
+
+  .your-time-label {
+    display: none;
+  }
+
+  .search input.with-your-time {
+    padding-right: 2.5rem;
+  }
+}
+
+/* Clocks */
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0 clamp(1rem, 3vw, 2rem);
+}
+
+/* A box sized by the layout, never by the text, which FitText sizes to it. */
+.fit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.fit-text {
+  display: inline-block;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.day-period {
+  margin-left: 0.05em;
+  font-size: 0.3em;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.single {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-block: 1rem 2rem;
+  text-align: center;
+}
+
+.single-title {
+  margin: 0;
+  font-size: clamp(1.875rem, 4vw, 3rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.single-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+}
+
+/*
+ * Large, short of filling a wide window: FitText keeps the digits within these. A third of the
+ * height, less in a short window so the rest of the page still fits, but never so little that
+ * a phone on its side shows a small clock.
+ */
+.single-clock {
+  width: 100%;
+  max-width: max(36rem, 70vw);
+  max-height: clamp(30vh, calc(100vh - 29rem), 34vh);
+  margin-block: clamp(1rem, 5vh, 3.5rem);
+}
+
+.single-date {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.2vw, 1.5rem);
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 46rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  color: var(--muted);
+  list-style: none;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  color: var(--muted);
+}
+
+.details > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem 0.5rem 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.details > summary:hover {
+  color: var(--text);
+}
+
+.details > summary .icon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 150ms ease;
+}
+
+.details[open] > summary .icon {
+  transform: rotate(180deg);
+}
+
+.facts:empty {
+  display: none;
+}
+
+.clock-notice {
+  color: var(--text);
+}
+
+.clock-failed {
+  color: var(--warning);
+}
+
+.details-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 56rem;
+  margin-top: 0.75rem;
+}
+
+/* Each fact a label over its value, side by side, centred like the rest of the page. */
+.detail-facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 2.5rem;
+  margin: 0;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 5rem;
+}
+
+.fact-wide {
+  flex-basis: 100%;
+}
+
+.fact-label {
+  color: var(--muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fact-value {
+  margin: 0.2rem 0 0;
+  color: var(--text);
+}
+
+.fact-wide .fact-value {
+  max-width: 40rem;
+}
+
+.fact-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.footnote {
+  margin: 1.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr));
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.card-names {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  /* Room for a subtitle in every card, so the clocks in a row line up. */
+  min-height: calc((1.1rem + 0.875rem) * 1.45);
+}
+
+.card-title {
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+
+.card-subtitle {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-head .icon-button {
+  margin: -0.3rem -0.4rem 0 0;
+}
+
+.card-clock {
+  width: 100%;
+  aspect-ratio: 3.4;
+  margin-block: 0.25rem;
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* Problems */
+
+.notice {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.not-found {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.not-found-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Footer */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 0.5rem;
+  text-align: center;
+  padding: 1rem clamp(1rem, 3vw, 2rem) 1.5rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.footer a {
+  color: inherit;
+}
+
+.footer a:hover {
+  color: var(--text);
+}
+
+@media (max-width: 30rem) {
+  .footer-wordy {
+    display: none;
+  }
+}
+
+.main > .clock-notice {
+  margin: 1rem 0 0;
+}
+
+/* Theme */
+
+/* A popover, in the top layer: placed under the header's tools, which stay at its top right. */
+.theme-menu {
+  position: fixed;
+  inset: auto;
+  top: 3.6rem;
+  right: clamp(1rem, 3vw, 2rem);
+  min-width: 13rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+}
+
+.theme-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.theme-modes legend {
+  padding: 0 0 0.4rem 0.5rem;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.theme-mode {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+/* The radio button itself is the whole row, so the button is hidden but still focused. */
+.theme-mode input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.theme-mode:hover {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.theme-mode:has(input:checked) {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.theme-mode:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.theme-mode-icon {
+  display: inline-flex;
+  color: var(--muted);
+}
+
+.theme-mode-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.theme-mode:has(input:checked) .theme-mode-icon {
+  color: var(--accent);
+}
+
+.theme-colors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.theme-color {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.theme-color input {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.theme-color input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.theme-color input::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.theme-color input::-moz-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+/* Help */
+
+.help {
+  width: min(42rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 3rem);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.28);
+}
+
+.help::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.help-body {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.help-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 -0.5rem;
+  padding: 1rem 0.5rem 0.25rem;
+  background: var(--surface);
+}
+
+.help-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.help h3 {
+  margin: 1.5rem 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.help p {
+  margin: 0.5rem 0;
+}
+
+.help-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.help-table th {
+  padding: 0.4rem 1.25rem 0.4rem 0;
+  color: var(--muted);
+  font-weight: 500;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.help-table td {
+  padding: 0.4rem 0;
+}
+
+.help-table tr + tr {
+  border-top: 1px solid var(--line);
+}
+
+.help-table td a {
+  display: inline-block;
+  margin-right: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+/* On a phone, each label over what it labels. */
+@media (max-width: 30rem) {
+  .help-table th,
+  .help-table td {
+    display: block;
+  }
+
+  .help-table th {
+    padding-bottom: 0;
+  }
+
+  .help-table td {
+    padding-top: 0.15rem;
+  }
+}
+
+.help code,
+.help kbd {
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+}
+
+.help kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  margin-right: 0.3rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 0.35rem;
+  background: var(--bg);
+  color: var(--text);
+  text-align: center;
+}
+
+/* Full screen: the clocks alone. */
+
+.fullscreen .top,
+.fullscreen .footer,
+.fullscreen .facts,
+.fullscreen .details,
+.fullscreen .notice {
+  display: none;
+}
+
+.fullscreen .single {
+  min-height: 100dvh;
+}
+
+.fullscreen .single-clock {
+  max-width: 94vw;
+  max-height: 70vh;
+}
+
+.fullscreen .grid {
+  align-content: center;
+  min-height: 100dvh;
+  margin: 0;
+}
