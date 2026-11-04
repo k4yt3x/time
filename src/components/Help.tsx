@@ -23,6 +23,7 @@ const shortcuts: [keys: string[], does: () => string][] = [
   [['Shift', 'Enter'], () => messages.keyAdd],
   [['Esc'], () => messages.keyEscape],
   [['Home'], () => messages.keyHome],
+  [['←', '→'], () => messages.keyReorder],
   [['?'], () => messages.keyHelp],
   [['F11'], () => messages.keyFullscreen],
 ]

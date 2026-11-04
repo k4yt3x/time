@@ -67,6 +67,16 @@ a:hover {
   color: var(--muted);
 }
 
+/* Read by screen readers, not shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .app {
   min-height: 100dvh;
   display: flex;
@@ -554,6 +564,8 @@ a:hover {
 }
 
 .grid {
+  /* The cards' offsets, by which a dragged card finds its place, are from the grid. */
+  position: relative;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr));
   gap: 1rem;
@@ -603,7 +615,33 @@ a:hover {
 }
 
 .card-head .icon-button {
-  margin: -0.3rem -0.4rem 0 0;
+  margin-top: -0.3rem;
+}
+
+.card-head .icon-button:last-child {
+  margin-right: -0.4rem;
+}
+
+/* The handle a card is dragged by, which takes the touch rather than scrolling the page. */
+.card-head .card-handle {
+  margin-right: -0.4rem;
+  cursor: grab;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+/* A card being dragged, above the others until it has slid into its place. */
+.card.lifted {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+}
+
+:root.dragging,
+:root.dragging * {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .card-clock {

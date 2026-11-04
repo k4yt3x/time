@@ -30,6 +30,17 @@ export function show(tokens: readonly string[]): void {
   window.scrollTo(0, 0)
 }
 
+/**
+ * Shows the same clocks in another order. The address changes in place: rearranging is not a
+ * step to go back through, and the arrow keys would make one of every move.
+ */
+export function reorder(tokens: readonly string[]): void {
+  const path = pathOf(tokens)
+  if (path === location.pathname) return
+  history.replaceState(history.state, '', path + location.search + location.hash)
+  route.value = parsePath(path)
+}
+
 /** Adds a clock beside those shown. */
 export function add(token: string): void {
   show([...clocks.value.map((clock) => clock.token), token])

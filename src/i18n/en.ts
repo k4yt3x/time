@@ -10,6 +10,9 @@ export const en: Messages = {
   noMatches: (query) => `Nothing matches “${query}”.`,
   addClock: (name) => `Add ${name}`,
   removeClock: (name) => `Remove ${name}`,
+  moveClock: (name) => `Move ${name}`,
+  moveClockHint: 'Drag to move, or use the arrow keys',
+  clockMoved: (name, position, count) => `${name} moved to position ${position} of ${count}`,
 
   yourTime: 'Your time',
   yourTimeZone: (place) => `Your time zone: ${place}`,
@@ -110,6 +113,7 @@ export const en: Messages = {
   keyAdd: 'Add it beside the clocks shown',
   keyEscape: 'Clear the search, or close this',
   keyHome: 'Your own time zone',
+  keyReorder: 'Move a clock, on its handle',
   keyHelp: 'This help',
   keyFullscreen: 'Full screen, the browser’s own',
   helpAccuracy: 'Accuracy',

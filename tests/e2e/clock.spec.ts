@@ -165,6 +165,66 @@ test.describe('several clocks', () => {
     await expect(page).toHaveURL('/Tokyo')
     await expect(heading(page)).toHaveText('Tokyo, Japan')
   })
+
+  /** Drags a card by its handle to the middle of the card in another place, without letting go. */
+  async function dragTo(page: Page, name: string, place: number) {
+    const from = await page.getByRole('button', { name: `Move ${name}`, exact: true }).boundingBox()
+    const to = await page.locator('.card').nth(place).boundingBox()
+    if (!from || !to) throw new Error('No card to drag')
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 12 })
+  }
+
+  test('rearranged by dragging, the address in step', async ({ page }) => {
+    await page.goto('/Tokyo,London,UTC+5:30')
+    const titles = page.locator('.card-title')
+    await expect(titles).toHaveText(['Tokyo', 'London', 'UTC+5:30'])
+    const steps = await page.evaluate(() => history.length)
+    await dragTo(page, 'Tokyo', 2)
+    // The others make way before the card is let go.
+    await expect(titles).toHaveText(['London', 'UTC+5:30', 'Tokyo'])
+    await page.mouse.up()
+    await expect(page).toHaveURL('/London,UTC+5:30,Tokyo')
+    await expect(page.getByRole('status')).toHaveText('Tokyo moved to position 3 of 3')
+    await expect(page.locator('.card').nth(2)).not.toHaveClass(/lifted/)
+    // Rearranging is no step to go back through.
+    expect(await page.evaluate(() => history.length)).toBe(steps)
+    await page.reload()
+    await expect(titles).toHaveText(['London', 'UTC+5:30', 'Tokyo'])
+  })
+
+  test('a drag cancelled with Escape puts the card back', async ({ page }) => {
+    await page.goto('/Tokyo,London,UTC+5:30')
+    const titles = page.locator('.card-title')
+    await dragTo(page, 'UTC+5:30', 0)
+    await expect(titles).toHaveText(['UTC+5:30', 'Tokyo', 'London'])
+    await page.keyboard.press('Escape')
+    await expect(titles).toHaveText(['Tokyo', 'London', 'UTC+5:30'])
+    await page.mouse.up()
+    await expect(page).toHaveURL('/Tokyo,London,UTC+5:30')
+    await expect(page.getByRole('status')).toHaveText('')
+  })
+
+  test('rearranged with the arrow keys on a card’s handle', async ({ page }) => {
+    await page.goto('/Tokyo,London,UTC+5:30')
+    const handle = page.getByRole('button', { name: 'Move Tokyo', exact: true })
+    await handle.focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(page).toHaveURL('/London,Tokyo,UTC+5:30')
+    await expect(handle).toBeFocused()
+    await expect(page.getByRole('status')).toHaveText('Tokyo moved to position 2 of 3')
+    await page.keyboard.press('End')
+    await expect(page).toHaveURL('/London,UTC+5:30,Tokyo')
+    await expect(handle).toBeFocused()
+    // Home moves the card, rather than leading back to your own time zone.
+    await page.keyboard.press('Home')
+    await expect(page).toHaveURL('/Tokyo,London,UTC+5:30')
+    await page.keyboard.press('ArrowUp')
+    await expect(page).toHaveURL('/Tokyo,London,UTC+5:30')
+    await expect(page.locator('.card-title')).toHaveText(['Tokyo', 'London', 'UTC+5:30'])
+    await expect(handle).toBeFocused()
+  })
 })
 
 test.describe('search', () => {

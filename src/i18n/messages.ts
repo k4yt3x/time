@@ -14,6 +14,11 @@ export interface Messages {
   noMatches: (query: string) => string
   addClock: (name: string) => string
   removeClock: (name: string) => string
+  moveClock: (name: string) => string
+  /** How to move a clock, on its handle. */
+  moveClockHint: string
+  /** Told to screen readers once a clock is moved: its name and its place now. */
+  clockMoved: (name: string, position: number, count: number) => string
 
   yourTime: string
   yourTimeZone: (place: string) => string
@@ -113,6 +118,7 @@ export interface Messages {
   keyAdd: string
   keyEscape: string
   keyHome: string
+  keyReorder: string
   keyHelp: string
   keyFullscreen: string
   helpAccuracy: string
