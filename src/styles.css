@@ -13,6 +13,11 @@
   --warning: light-dark(#9a4b06, #f5b56b);
   --warning-bg: light-dark(#fdf1e2, #2c2117);
   font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /*
+   * Inter's contextual alternates raise a colon between digits to their middle, as in 09:41.
+   * Chromium turns them off in letter-spaced text, such as the clocks; this keeps them on.
+   */
+  font-feature-settings: "calt";
   line-height: 1.45;
   background: var(--bg);
   color: var(--text);
